@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Mouse &amp; Cat Lobby</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#caa; font-family:"Comic Sans MS","Baloo","Trebuchet MS",system-ui,sans-serif;
+    overscroll-behavior:none; touch-action:none; user-select:none; -webkit-user-select:none; }
+  #game { position:fixed; inset:0; } canvas { display:block; }
+
+  #hud { position:fixed; top:0; left:0; right:0; padding:10px 12px; display:none; justify-content:space-between; align-items:flex-start; pointer-events:none; z-index:5; gap:8px; }
+  .badge { background:rgba(255,255,255,0.9); border-radius:16px; padding:7px 12px; font-weight:bold; color:#5a3a22; box-shadow:0 4px 0 rgba(0,0,0,0.18); font-size:clamp(14px,4vw,20px); line-height:1.12; white-space:nowrap; }
+  .badge small { display:block; font-size:0.58em; color:#a07a55; font-weight:bold; }
+  #hudLeft,#hudRight { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  #muteBtn { pointer-events:auto; cursor:pointer; width:46px; height:46px; border-radius:50%; border:none; background:rgba(255,255,255,0.9); font-size:22px; box-shadow:0 4px 0 rgba(0,0,0,0.18); display:flex; align-items:center; justify-content:center; }
+
+  #prompt { position:fixed; left:50%; bottom:140px; transform:translateX(-50%); z-index:7; pointer-events:none; display:none;
+    background:rgba(0,0,0,0.6); color:#fff; padding:10px 18px; border-radius:16px; font-weight:bold; font-size:clamp(15px,4vw,21px); text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+
+  .overlay { position:fixed; inset:0; z-index:20; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; text-align:center; padding:24px;
+    background:radial-gradient(circle at 50% 30%, rgba(0,0,0,0.2), rgba(0,0,0,0.6)); backdrop-filter:blur(2px); }
+  .overlay.hidden { display:none; }
+  .title { font-size:clamp(34px,10vw,74px); color:#fff; margin:0; line-height:1; text-shadow:0 4px 0 #b9743a, 0 8px 0 rgba(0,0,0,0.25), 0 14px 22px rgba(0,0,0,0.5); }
+  .title .em { color:#ffd23f; }
+  .subtitle { font-size:clamp(16px,4.5vw,23px); color:#fff; max-width:600px; text-shadow:0 2px 6px rgba(0,0,0,0.6); }
+  .emoji-row { font-size:clamp(36px,11vw,66px); letter-spacing:6px; filter:drop-shadow(0 6px 6px rgba(0,0,0,0.4)); }
+  .hint { font-size:clamp(13px,3.6vw,17px); color:rgba(255,255,255,0.9); max-width:600px; }
+  .namebox { font-family:inherit; font-size:clamp(18px,5vw,26px); padding:12px 18px; border-radius:14px; border:3px solid #ffd23f; outline:none; text-align:center; width:min(320px,80vw); }
+  .btn { pointer-events:auto; cursor:pointer; border:none; font-family:inherit; font-weight:bold; margin:4px; background:linear-gradient(#ffcf4d,#ffac1c); color:#5a3a00; border-radius:999px; padding:15px 34px; font-size:clamp(19px,5.5vw,28px);
+    box-shadow:0 6px 0 #c9871a, 0 10px 18px rgba(0,0,0,0.35); transition:transform .06s,box-shadow .06s; }
+  .btn:active { transform:translateY(4px); box-shadow:0 2px 0 #c9871a, 0 6px 10px rgba(0,0,0,0.3); }
+
+  .joystick { position:fixed; left:22px; bottom:24px; width:132px; height:132px; border-radius:50%; z-index:8; display:none; touch-action:none;
+    background:radial-gradient(circle, rgba(255,255,255,0.28), rgba(255,255,255,0.1)); border:3px solid rgba(255,255,255,0.55); box-shadow:0 4px 14px rgba(0,0,0,0.3); }
+  .joystick .knob { position:absolute; left:50%; top:50%; width:60px; height:60px; margin:-30px 0 0 -30px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fff, #cfcfe0 70%, #9a9ab0); box-shadow:0 4px 10px rgba(0,0,0,0.35); }
+  #useBtn { position:fixed; right:26px; bottom:38px; width:104px; height:104px; border-radius:50%; z-index:8; display:none; border:3px solid rgba(255,255,255,0.6);
+    background:radial-gradient(circle at 40% 35%, #b6f0a0, #4caf50 75%); color:#fff; font-weight:bold; font-size:18px; box-shadow:0 6px 0 #2f7d33, 0 8px 16px rgba(0,0,0,0.35); touch-action:none; }
+  #useBtn:active { transform:translateY(3px); }
+  body.touch .joystick, body.touch #useBtn { display:flex; align-items:center; justify-content:center; }
+
+  #banner { position:fixed; top:30%; left:50%; transform:translate(-50%,-50%); z-index:12; pointer-events:none; text-align:center; font-size:clamp(28px,8vw,56px); font-weight:bold; color:#fff;
+    text-shadow:0 4px 0 rgba(0,0,0,0.3), 0 8px 18px rgba(0,0,0,0.6); opacity:0; transition:opacity .25s,transform .25s; }
+  #banner.show { opacity:1; }
+  #loadMsg { position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; font-size:20px; padding:30px; background:#7a5a44; }
+</style>
+</head>
+<body>
+  <div id="game"></div>
+  <div id="loadMsg">🏠 Loading the lobby… <br><br><small>(needs the internet the first time)</small></div>
+
+  <div id="hud">
+    <div id="hudLeft">
+      <div class="badge">🥧 <span id="pieCount">0</span><small>pies</small></div>
+      <div class="badge" id="formBadge">🐭 <span id="formText">Mouse</span><small>you are</small></div>
+    </div>
+    <div id="hudRight">
+      <div class="badge">👋 <span id="nameText">Mouse</span><small>code <span id="codeText">—</span></small></div>
+      <button id="muteBtn">🔊</button>
+    </div>
+  </div>
+  <div id="prompt"></div>
+  <div id="banner"></div>
+
+  <div class="joystick" id="joystick"><div class="knob"></div></div>
+  <button id="useBtn">USE</button>
+
+  <div class="overlay" id="startScreen">
+    <div class="emoji-row">🐭 &nbsp; 🥧 &nbsp; 🐱</div>
+    <h1 class="title">Mouse &amp; Cat <span class="em">Lobby</span></h1>
+    <div class="subtitle">Walk around, collect pies 🥧, buy fun costumes, and go to the cat home to turn into a cat! 🐱</div>
+    <input class="namebox" id="nameInput" maxlength="12" placeholder="Type your name">
+    <button class="btn" id="playBtn">▶ Enter Lobby</button>
+    <div class="hint" id="controlHint">Move: arrow keys / W A S D &nbsp;•&nbsp; press <b>E</b> to buy a costume or open a game door.</div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
+        onerror="document.getElementById('loadMsg').innerHTML='😕 Could not load the lobby.<br><br>Please check your internet and refresh.'"></script>
+<script>
+"use strict";
+(function () {
+  if (typeof THREE === "undefined") return;
+
+  // game links for the portals
+  const GAME_LINKS = {
+    cheese: "https://escanor8910.github.io/cheese-dash/",
+    sneaky: "https://escanor8910.github.io/sneaky-mouse/",
+  };
+
+  // ---- tuning ----
+  const SPEED = 9, PLAYER_R = 0.8, BX = 29, BZ = 19;     // bounds
+  const INTERACT_R = 3.2, PIE_R = 1.6, VENT_R = 1.6;
+
+  // ---- costumes ----
+  const MOUSE_COSTUMES = [
+    { name:"Gray",   color:0x9aa3c0, price:0 }, { name:"Red",    color:0xd83a3a, price:1 },
+    { name:"Blue",   color:0x3a76e0, price:1 }, { name:"Purple", color:0x9148db, price:1 },
+    { name:"Yellow", color:0xf2cf2e, price:1 }, { name:"Green",  color:0x57a84e, price:1 },
+    { name:"Black",  color:0x232323, price:2 }, { name:"Witch",  color:0x3c2c6b, price:3, hat:true },
+  ];
+  const CAT_COSTUMES = [
+    { name:"Orange", color:0xf2922b, price:0 }, { name:"Black", color:0x262626, price:1 },
+    { name:"White",  color:0xdadade, price:1 }, { name:"Tiger", color:0xc49a55, price:2 },
+    { name:"Pink",   color:0xff9ec2, price:2 },
+  ];
+
+  // ---- globals ----
+  let scene, camera, renderer, clock;
+  let playerGroup, mouseModel, catModel;
+  let walls = [], pies = [], stands = [], portals = [], vents = [];
+  let form = "mouse", pieCount = 0, playerName = "Mouse", inviteCode = "MOUSE";
+  let curMouseColor = 0x9aa3c0, curCatColor = 0xf2922b;
+  const owned = { mouse: { 0x9aa3c0:true }, cat: { 0xf2922b:true } };
+  let state = "start", walkPhase = 0, teleCool = 0, nearest = null, useArmed = false;
+  const keys = {};
+  const joy = { x:0, y:0, active:false };
+  const tmp = new THREE.Vector3();
+  const camDesired = new THREE.Vector3();
+  const isTouch = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
+
+  // ---- audio ----
+  let actx=null, muted=false;
+  function initAudio(){ if(actx) return; try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=null; } }
+  function tone(f,dur,type,vol,when){ if(!actx||muted) return; const t=when||actx.currentTime,o=actx.createOscillator(),g=actx.createGain();
+    o.type=type||"sine"; o.frequency.setValueAtTime(f,t); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol||0.2,t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(g).connect(actx.destination); o.start(t); o.stop(t+dur+0.03); }
+  function sfxPie(){ tone(660,0.1,"triangle",0.2); tone(990,0.13,"triangle",0.16,actx?actx.currentTime+0.07:0); }
+  function sfxBuy(){ if(!actx)return; const b=actx.currentTime; [523,784,1047].forEach((n,i)=>tone(n,0.16,"square",0.14,b+i*0.06)); }
+  function sfxNo(){ tone(200,0.2,"sawtooth",0.18); }
+  function sfxPop(){ tone(440,0.12,"sine",0.18); tone(880,0.12,"sine",0.12,actx?actx.currentTime+0.05:0); }
+  function sfxVent(){ tone(300,0.18,"sine",0.18); tone(600,0.18,"sine",0.14,actx?actx.currentTime+0.08:0); }
+
+  // ---- init ----
+  function init(){
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xbfa890);
+    scene.fog = new THREE.Fog(0xbfa890, 45, 95);
+
+    camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 200);
+    camera.position.set(0,11,14);
+
+    renderer = new THREE.WebGLRenderer({ antialias:true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.getElementById("game").appendChild(renderer.domElement);
+
+    scene.add(new THREE.HemisphereLight(0xfff2e0, 0x6a5a4a, 1.0));
+    const sun = new THREE.DirectionalLight(0xfff2d8, 0.85); sun.position.set(20,34,12); sun.castShadow=true;
+    sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.near=1; sun.shadow.camera.far=130;
+    sun.shadow.camera.left=-50; sun.shadow.camera.right=50; sun.shadow.camera.top=40; sun.shadow.camera.bottom=-40; sun.shadow.bias=-0.0004;
+    scene.add(sun);
+
+    buildWorld();
+
+    playerGroup = new THREE.Group(); scene.add(playerGroup);
+    mouseModel = makeMouse(curMouseColor); catModel = makeCat(curCatColor); catModel.visible=false;
+    playerGroup.add(mouseModel); playerGroup.add(catModel);
+    playerGroup.position.set(-12,0,10);
+
+    clock = new THREE.Clock();
+    bindEvents();
+    if (isTouch){ document.body.classList.add("touch"); document.getElementById("controlHint").innerHTML = "Move with the joystick &nbsp;•&nbsp; tap the green <b>USE</b> button to buy costumes or open game doors."; }
+    document.getElementById("loadMsg").style.display="none";
+    animate();
+  }
+
+  // ---- characters ----
+  function makeMouse(color){
+    const g=new THREE.Group();
+    const fur=new THREE.MeshStandardMaterial({color:color,roughness:0.7});
+    const furL=new THREE.MeshStandardMaterial({color:0xeef0f6,roughness:0.7});
+    const pink=new THREE.MeshStandardMaterial({color:0xff9ec2,roughness:0.6});
+    const black=new THREE.MeshStandardMaterial({color:0x222230,roughness:0.4});
+    const body=new THREE.Mesh(new THREE.SphereGeometry(0.6,16,16),fur); body.scale.set(1,0.85,1.25); body.position.y=0.6; body.castShadow=true; g.add(body);
+    const belly=new THREE.Mesh(new THREE.SphereGeometry(0.44,12,12),furL); belly.scale.set(0.8,0.6,1); belly.position.set(0,0.44,0.34); g.add(belly);
+    const head=new THREE.Mesh(new THREE.SphereGeometry(0.45,16,16),fur); head.position.set(0,0.7,0.68); head.castShadow=true; g.add(head);
+    const earGeo=new THREE.SphereGeometry(0.25,12,12);
+    [-1,1].forEach(s=>{ const e=new THREE.Mesh(earGeo,fur); e.scale.set(1,1,0.35); e.position.set(0.27*s,1.0,0.6); g.add(e);
+      const inr=new THREE.Mesh(earGeo,pink); inr.scale.set(0.6,0.6,0.25); inr.position.set(0.27*s,1.0,0.67); g.add(inr); });
+    [-1,1].forEach(s=>{ const e=new THREE.Mesh(new THREE.SphereGeometry(0.07,8,8),black); e.position.set(0.16*s,0.76,1.02); g.add(e); });
+    const nose=new THREE.Mesh(new THREE.SphereGeometry(0.08,8,8),pink); nose.position.set(0,0.64,1.13); g.add(nose);
+    const tail=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.03,1.25,6),pink); tail.position.set(0,0.68,-0.82); tail.rotation.x=-Math.PI/3; g.add(tail);
+    // witch hat (hidden unless worn)
+    const hat=new THREE.Group();
+    const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.05,16),new THREE.MeshStandardMaterial({color:0x2a1f4d})); brim.position.y=1.18; hat.add(brim);
+    const cone=new THREE.Mesh(new THREE.ConeGeometry(0.3,0.7,16),new THREE.MeshStandardMaterial({color:0x3c2c6b})); cone.position.y=1.55; hat.add(cone);
+    hat.position.z=0.55; hat.visible=false; g.add(hat);
+    g.userData={fur:fur, body:body, tail:tail, hat:hat}; g.scale.setScalar(1.15);
+    return g;
+  }
+  function makeCat(color){
+    const g=new THREE.Group();
+    const fur=new THREE.MeshStandardMaterial({color:color,roughness:0.65});
+    const cream=new THREE.MeshStandardMaterial({color:0xffe3b0,roughness:0.7});
+    const pink=new THREE.MeshStandardMaterial({color:0xff8fb1,roughness:0.6});
+    const eyeW=new THREE.MeshStandardMaterial({color:0xeafff0,roughness:0.3});
+    const black=new THREE.MeshStandardMaterial({color:0x222230,roughness:0.4});
+    const body=new THREE.Mesh(new THREE.SphereGeometry(0.78,18,18),fur); body.scale.set(1,0.92,1.35); body.position.y=0.8; body.castShadow=true; g.add(body);
+    const belly=new THREE.Mesh(new THREE.SphereGeometry(0.58,14,14),cream); belly.scale.set(0.8,0.62,1); belly.position.set(0,0.58,0.4); g.add(belly);
+    const head=new THREE.Mesh(new THREE.SphereGeometry(0.58,18,18),fur); head.position.set(0,0.98,0.92); head.castShadow=true; g.add(head);
+    const earGeo=new THREE.ConeGeometry(0.27,0.48,4);
+    [-1,1].forEach(s=>{ const e=new THREE.Mesh(earGeo,fur); e.position.set(0.31*s,1.46,0.82); e.rotation.y=Math.PI/4; g.add(e);
+      const inr=new THREE.Mesh(new THREE.ConeGeometry(0.14,0.28,4),pink); inr.position.set(0.31*s,1.44,0.87); inr.rotation.y=Math.PI/4; g.add(inr); });
+    [-1,1].forEach(s=>{ const w=new THREE.Mesh(new THREE.SphereGeometry(0.14,10,10),eyeW); w.scale.set(1,1.2,0.6); w.position.set(0.21*s,1.05,1.38); g.add(w);
+      const p=new THREE.Mesh(new THREE.SphereGeometry(0.07,8,8),black); p.scale.set(0.6,1.3,1); p.position.set(0.21*s,1.05,1.46); g.add(p); });
+    const nose=new THREE.Mesh(new THREE.SphereGeometry(0.1,8,8),pink); nose.position.set(0,0.9,1.5); g.add(nose);
+    const tail=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.06,1.55,8),fur); tail.position.set(0,0.98,-0.98); tail.rotation.x=-Math.PI/2.4; tail.castShadow=true; g.add(tail);
+    g.userData={fur:fur, body:body, tail:tail}; g.scale.setScalar(1.2);
+    return g;
+  }
+
+  // ---- labels (canvas sprites) ----
+  function makeLabel(text, color){
+    const c=document.createElement("canvas"); c.width=256; c.height=72; const x=c.getContext("2d");
+    x.fillStyle="rgba(0,0,0,0.0)"; x.fillRect(0,0,256,72);
+    x.font="bold 30px 'Comic Sans MS', sans-serif"; x.textAlign="center"; x.textBaseline="middle";
+    x.lineWidth=6; x.strokeStyle="rgba(0,0,0,0.55)"; x.strokeText(text,128,36);
+    x.fillStyle=color||"#fff"; x.fillText(text,128,36);
+    const tex=new THREE.CanvasTexture(c);
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));
+    sp.scale.set(3.4,0.95,1); return sp;
+  }
+
+  // ---- world ----
+  function box(x,y,z,sx,sy,sz,color,solid,rough){
+    const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz), new THREE.MeshStandardMaterial({color:color,roughness:rough==null?0.95:rough}));
+    m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; scene.add(m);
+    if(solid) walls.push({minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2});
+    return m;
+  }
+  function cyl(x,y,z,r,h,color){ const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,16),new THREE.MeshStandardMaterial({color:color,roughness:0.85})); m.position.set(x,y,z); m.castShadow=true; scene.add(m); return m; }
+
+  function buildWorld(){
+    // floors
+    const fM=new THREE.Mesh(new THREE.PlaneGeometry(30,40), new THREE.MeshStandardMaterial({color:0xb98a55,roughness:1})); fM.rotation.x=-Math.PI/2; fM.position.set(-15,0,0); fM.receiveShadow=true; scene.add(fM);
+    const fC=new THREE.Mesh(new THREE.PlaneGeometry(30,40), new THREE.MeshStandardMaterial({color:0xe7d4e8,roughness:1})); fC.rotation.x=-Math.PI/2; fC.position.set(15,0,0); fC.receiveShadow=true; scene.add(fC);
+
+    // outer walls (solid)
+    box(0,2.5,-20,62,5,1,0x7a5a44,true);     // back
+    box(0,2.5,20,62,5,1,0x7a5a44,true);      // front
+    box(-30,2.5,0,1,5,40,0x6e5040,true);     // left
+    box(30,2.5,0,1,5,40,0x9a86a0,true);      // right
+    // divider with a doorway gap around z in [-3.5,3.5]
+    box(0,2.5,-11.75,1,5,16.5,0x6e5847,true);
+    box(0,2.5,11.75,1,5,16.5,0x6e5847,true);
+    box(0,4.4,0,1,1.2,7,0x6e5847,false);     // door top arch (non-solid)
+
+    // ---- mouse house decor ----
+    box(-15,1.0,-17.5,16,2,1.6,0x8a5e36,false);          // shop counter
+    box(-15,2.1,-17.4,16.4,0.3,2,0xc7a878,false);        // counter top
+    makeMouseHole(-27.5,-14);
+    bookStack(-25,8); bookStack(-22.5,8.8); toyBlocks(-24,-2); toyBlocks(-9,13);
+    placeLabel("🧀 Mouse Shop", -15, 4.2, -17.5, "#5a3a16");
+
+    // ---- cat home decor ----
+    box(15,1.0,-17.5,16,2,1.6,0xb98fb0,false);           // cat shop counter
+    box(15,2.1,-17.4,16.4,0.3,2,0xe3c7e0,false);
+    box(15,2.0,19.4,7,3,0.3,0x9fcdf0,false);             // window backdrop
+    box(15,2.0,19.5,7,0.2,0.35,0xeaeaf0,false); box(15,2.0,19.5,0.25,3,0.35,0xeaeaf0,false);
+    rug(11,16,0xf5b6cf); rug(19,16,0xb6d2f5); rug(15,8,0xf5e08a);
+    catBed(11,15); catTree(20,15); toyBall(13,9,0xe84538); toyBall(17,10,0x3a8ee0);
+    cyl(18,0.28,17,0.5,0.16,0xe0c89a); cyl(20,0.28,17,0.5,0.16,0xa9d4f0);   // bowls
+    placeLabel("🐱 Cat Home", 15, 4.2, -17.5, "#4a2a4a");
+
+    // ---- pies (currency) ----
+    [[-20,-6],[-10,4],[-6,-12],[-24,14],[8,-6],[20,-12],[12,4],[22,12],[6,14],[-14,16]].forEach(p=>spawnPie(p[0],p[1]));
+
+    // ---- costume stands ----
+    MOUSE_COSTUMES.forEach((c,i)=>{ const x=-24+i*2.7; makeStand(x,-14,"mouse",c); });
+    CAT_COSTUMES.forEach((c,i)=>{ const x=8+i*3.0; makeStand(x,-14,"cat",c); });
+
+    // ---- vents (quick travel + room swap) ----
+    makeVent(-26,16,"mouse"); makeVent(26,16,"cat");
+
+    // ---- game portals (doors that launch the games) ----
+    makePortal(-8,18,"cheese","🧀 Cheese Dash", 0xffac1c);
+    makePortal(8,18,"sneaky","🐭 Sneaky Mouse", 0x4caf50);
+
+    placeLabel("Move around! → cross the door to become a CAT", 0, 3.4, -19.2, "#fff");
+  }
+
+  function placeLabel(text,x,y,z,color){ const s=makeLabel(text,color); s.position.set(x,y,z); s.scale.set(7,1.9,1); scene.add(s); }
+  function makeMouseHole(x,z){ const h=new THREE.Mesh(new THREE.CircleGeometry(0.9,20),new THREE.MeshBasicMaterial({color:0x140f12})); h.rotation.x=-Math.PI/2; h.position.set(x,0.03,z); scene.add(h);
+    box(x,0.5,z,2.0,1.0,0.5,0x6e4a30,false); }
+  function bookStack(x,z){ const cols=[0xe2483f,0x3a76e0,0xf2cf2e,0x57b06a]; for(let i=0;i<4;i++) box(x,0.18+i*0.16,z,1.1-i*0.08,0.15,0.75,cols[i],false); }
+  function toyBlocks(x,z){ box(x-0.8,0.4,z-0.5,0.8,0.8,0.8,0xe2483f,false); box(x+0.4,0.3,z,1.0,0.6,0.6,0x3a76e0,false); box(x,0.5,z+0.9,0.7,1.0,0.7,0xf2cf2e,false); }
+  function rug(x,z,color){ const m=new THREE.Mesh(new THREE.CircleGeometry(2.4,24),new THREE.MeshStandardMaterial({color:color,roughness:1})); m.rotation.x=-Math.PI/2; m.position.set(x,0.02,z); m.receiveShadow=true; scene.add(m); }
+  function catBed(x,z){ cyl(x,0.18,z,1.5,0.3,0xd44f7e); cyl(x,0.34,z,1.05,0.22,0xf3c9da); }
+  function catTree(x,z){ cyl(x,0.6,z,0.4,1.2,0x9a7a4a); box(x,1.5,z,2,0.4,2,0xc8a062,false); cyl(x,2.4,z,0.3,1.6,0x9a7a4a); box(x,3.3,z,1.6,0.4,1.6,0xc8a062,false);
+    const ball=new THREE.Mesh(new THREE.SphereGeometry(0.3,12,12),new THREE.MeshStandardMaterial({color:0xff5b8a})); ball.position.set(x+0.6,1.0,z); scene.add(ball); }
+  function toyBall(x,z,color){ const m=new THREE.Mesh(new THREE.SphereGeometry(0.4,14,14),new THREE.MeshStandardMaterial({color:color,roughness:0.5})); m.position.set(x,0.4,z); m.castShadow=true; scene.add(m); }
+
+  // ---- pies ----
+  function spawnPie(x,z){ const g=new THREE.Group();
+    const crust=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.36,0.28,16),new THREE.MeshStandardMaterial({color:0xe0b066,roughness:0.7})); g.add(crust);
+    const fill=new THREE.Mesh(new THREE.CylinderGeometry(0.34,0.34,0.1,16),new THREE.MeshStandardMaterial({color:0xc23a2a,roughness:0.6,emissive:0x5a1208,emissiveIntensity:0.2})); fill.position.y=0.16; g.add(fill);
+    g.position.set(x,0.6,z); g.userData={base:0.6, on:true}; scene.add(g); pies.push(g);
+  }
+
+  // ---- costume stand ----
+  function makeStand(x,z,kind,costume){
+    const g=new THREE.Group(); g.position.set(x,0,z);
+    cyl(x,0.25,z,0.55,0.5,0x8a6a48);
+    const mini = kind==="mouse" ? makeMouse(costume.color) : makeCat(costume.color);
+    mini.scale.setScalar(kind==="mouse"?0.55:0.5); mini.position.set(x,0.5,z); mini.rotation.y=Math.PI; scene.add(mini);
+    if (kind==="mouse" && costume.hat) mini.userData.hat.visible=true;
+    const label=makeLabel(costume.name+(costume.price?" • "+costume.price+"🥧":" • Free"), "#fff");
+    label.position.set(x,2.3,z); label.scale.set(3.0,0.85,1); scene.add(label);
+    stands.push({ x, z, kind, costume, mini });
+  }
+
+  // ---- vents ----
+  function makeVent(x,z,kind){ const ring=new THREE.Mesh(new THREE.TorusGeometry(1.0,0.18,10,24),new THREE.MeshStandardMaterial({color:0x9aa6b2,emissive:0x223044,emissiveIntensity:0.4}));
+    ring.rotation.x=-Math.PI/2; ring.position.set(x,0.1,z); scene.add(ring);
+    const hole=new THREE.Mesh(new THREE.CircleGeometry(0.9,20),new THREE.MeshBasicMaterial({color:0x10141c})); hole.rotation.x=-Math.PI/2; hole.position.set(x,0.07,z); scene.add(hole);
+    const v={x,z,kind}; vents.push(v); }
+
+  // ---- portals ----
+  function makePortal(x,z,key,label,color){
+    box(x,2.0,z+0.4,3.6,4,0.5,0x5a4636,false);                  // frame back
+    const glow=new THREE.Mesh(new THREE.PlaneGeometry(2.6,3.2),new THREE.MeshBasicMaterial({color:color,transparent:true,opacity:0.5})); glow.position.set(x,1.9,z+0.15); scene.add(glow);
+    const lab=makeLabel(label,"#fff"); lab.position.set(x,4.2,z); lab.scale.set(4.4,1.2,1); scene.add(lab);
+    portals.push({ x, z, key, label, glow });
+  }
+
+  // ---- input ----
+  function bindEvents(){
+    addEventListener("resize", onResize);
+    addEventListener("keydown", e=>{ const k=e.key.toLowerCase(); keys[k]=true;
+      if(k==="e"||k==="enter") doUse();
+      if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(k)) e.preventDefault(); }, {passive:false});
+    addEventListener("keyup", e=>{ keys[e.key.toLowerCase()]=false; });
+    document.getElementById("playBtn").onclick = enterLobby;
+    document.getElementById("nameInput").addEventListener("keydown", e=>{ if(e.key==="Enter") enterLobby(); });
+    document.getElementById("muteBtn").onclick = ()=>{ muted=!muted; document.getElementById("muteBtn").textContent=muted?"🔇":"🔊"; };
+    setupJoystick();
+    const ub=document.getElementById("useBtn"); ub.addEventListener("touchstart",e=>{e.preventDefault();doUse();},{passive:false}); ub.addEventListener("mousedown",e=>{e.preventDefault();doUse();});
+    document.addEventListener("touchmove", e=>{ if(e.target.tagName!=="INPUT") e.preventDefault(); }, {passive:false});
+    document.addEventListener("gesturestart", e=>e.preventDefault());
+  }
+  function setupJoystick(){
+    const base=document.getElementById("joystick"), knob=base.querySelector(".knob"); const R=48; let id=null;
+    function setFrom(cxp,cyp){ const r=base.getBoundingClientRect(); let dx=cxp-(r.left+r.width/2), dy=cyp-(r.top+r.height/2); const len=Math.hypot(dx,dy);
+      if(len>R){dx=dx/len*R;dy=dy/len*R;} knob.style.transform="translate("+dx+"px,"+dy+"px)"; joy.x=dx/R; joy.y=dy/R; joy.active=true; }
+    function reset(){ joy.x=0;joy.y=0;joy.active=false; knob.style.transform="translate(0,0)"; id=null; }
+    base.addEventListener("touchstart",e=>{e.preventDefault();const t=e.changedTouches[0];id=t.identifier;setFrom(t.clientX,t.clientY);},{passive:false});
+    base.addEventListener("touchmove",e=>{e.preventDefault();for(const t of e.changedTouches)if(t.identifier===id)setFrom(t.clientX,t.clientY);},{passive:false});
+    base.addEventListener("touchend",e=>{for(const t of e.changedTouches)if(t.identifier===id)reset();},{passive:false});
+    base.addEventListener("touchcancel",reset,{passive:false});
+    let md=false; base.addEventListener("mousedown",e=>{md=true;setFrom(e.clientX,e.clientY);});
+    addEventListener("mousemove",e=>{if(md)setFrom(e.clientX,e.clientY);}); addEventListener("mouseup",()=>{if(md){md=false;reset();}});
+  }
+  function onResize(){ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); }
+
+  // ---- flow ----
+  function enterLobby(){
+    initAudio(); if(actx&&actx.state==="suspended") actx.resume();
+    const v=(document.getElementById("nameInput").value||"").trim();
+    playerName = v ? v.slice(0,12) : "Mouse";
+    let sum=0; for(let i=0;i<playerName.length;i++) sum+=playerName.charCodeAt(i)*(i+1);
+    inviteCode = (playerName.replace(/[^a-zA-Z]/g,"").toUpperCase().slice(0,3) || "MVC") + (1000 + (sum%9000));
+    document.getElementById("nameText").textContent = playerName;
+    document.getElementById("codeText").textContent = inviteCode;
+    document.getElementById("startScreen").classList.add("hidden");
+    document.getElementById("hud").style.display="flex";
+    updateHUD(); state="playing";
+    showBanner("Welcome, "+playerName+"! 🎉","#ffd23f");
+  }
+  function updateHUD(){ document.getElementById("pieCount").textContent=pieCount;
+    document.getElementById("formText").textContent = form==="mouse"?"Mouse":"Cat";
+    document.getElementById("formBadge").firstChild.textContent = form==="mouse"?"🐭 ":"🐱 "; }
+  let bannerTimer=null;
+  function showBanner(text,color){ const b=document.getElementById("banner"); b.textContent=text; b.style.color=color||"#fff"; b.classList.add("show");
+    if(bannerTimer)clearTimeout(bannerTimer); bannerTimer=setTimeout(()=>b.classList.remove("show"),1500); }
+  function showPrompt(text){ const p=document.getElementById("prompt"); if(text){ p.textContent=text; p.style.display="block"; } else p.style.display="none"; }
+
+  // ---- interactions ----
+  function doUse(){
+    if(state!=="playing"||!nearest) return;
+    if(nearest.kind_==="stand"){
+      const st=nearest.ref, cset=owned[st.kind], hasIt=cset[st.costume.color];
+      if(hasIt){ wearCostume(st.kind, st.costume); sfxPop(); showBanner("Wearing "+st.costume.name+"!","#fff"); }
+      else if(pieCount>=st.costume.price){ pieCount-=st.costume.price; cset[st.costume.color]=true; wearCostume(st.kind, st.costume); sfxBuy(); showBanner("Bought "+st.costume.name+"! 🎉","#ffd23f"); updateHUD(); }
+      else { sfxNo(); showBanner("Need more pie! 🥧","#ff9a9a"); }
+    } else if(nearest.kind_==="portal"){
+      sfxPop(); showBanner("Opening "+nearest.ref.label+"…","#fff");
+      setTimeout(()=>{ window.location.href = GAME_LINKS[nearest.ref.key]; }, 400);
+    }
+  }
+  function wearCostume(kind, costume){
+    if(kind==="mouse"){ curMouseColor=costume.color; mouseModel.userData.fur.color.setHex(costume.color); mouseModel.userData.hat.visible=!!costume.hat; }
+    else { curCatColor=costume.color; catModel.userData.fur.color.setHex(costume.color); }
+  }
+
+  // ---- collision ----
+  function resolve(p){
+    for(let it=0;it<2;it++) for(const w of walls){
+      const qx=Math.max(w.minX,Math.min(p.x,w.maxX)), qz=Math.max(w.minZ,Math.min(p.z,w.maxZ));
+      let dx=p.x-qx, dz=p.z-qz, d2=dx*dx+dz*dz;
+      if(d2<PLAYER_R*PLAYER_R){ if(d2>1e-5){ const d=Math.sqrt(d2),push=PLAYER_R-d; p.x+=dx/d*push; p.z+=dz/d*push; }
+        else { const l=p.x-w.minX,r=w.maxX-p.x,t=p.z-w.minZ,b=w.maxZ-p.z,m=Math.min(l,r,t,b);
+          if(m===l)p.x=w.minX-PLAYER_R; else if(m===r)p.x=w.maxX+PLAYER_R; else if(m===t)p.z=w.minZ-PLAYER_R; else p.z=w.maxZ+PLAYER_R; } }
+    }
+    p.x=Math.max(-BX,Math.min(BX,p.x)); p.z=Math.max(-BZ,Math.min(BZ,p.z));
+  }
+
+  // ---- per-frame ----
+  function update(dt){
+    const t=clock.elapsedTime;
+    let mx=0,mz=0;
+    if(keys["arrowup"]||keys["w"])mz-=1; if(keys["arrowdown"]||keys["s"])mz+=1;
+    if(keys["arrowleft"]||keys["a"])mx-=1; if(keys["arrowright"]||keys["d"])mx+=1;
+    if(joy.active){mx+=joy.x; mz+=joy.y;}
+    const len=Math.hypot(mx,mz); if(len>1){mx/=len;mz/=len;}
+    const moving=len>0.05;
+    if(moving){ playerGroup.position.x+=mx*SPEED*dt; playerGroup.position.z+=mz*SPEED*dt; resolve(playerGroup.position);
+      playerGroup.rotation.y=lerpAngle(playerGroup.rotation.y,Math.atan2(mx,mz),0.3); walkPhase+=dt*12; }
+
+    // form switch by side of the divider
+    const wantForm = playerGroup.position.x < 0 ? "mouse" : "cat";
+    if(wantForm!==form){ form=wantForm; mouseModel.visible=(form==="mouse"); catModel.visible=(form==="cat");
+      updateHUD(); showBanner(form==="cat"?"You're a CAT now! 🐱":"You're a MOUSE now! 🐭", "#fff"); sfxPop(); }
+
+    // walk animation on the visible model
+    const vm = form==="mouse"?mouseModel:catModel;
+    vm.userData.body.position.y = (form==="mouse"?0.6:0.8) + (moving?Math.abs(Math.sin(walkPhase))*0.12:Math.sin(t*2)*0.02);
+    vm.userData.tail.rotation.z = Math.sin(walkPhase*0.8)*(moving?0.5:0.2);
+
+    // pies bob/spin + collect
+    for(const pie of pies){ if(!pie.userData.on){ pie.userData.t-=dt; if(pie.userData.t<=0){ pie.userData.on=true; pie.visible=true; } continue; }
+      pie.rotation.y+=dt*2; pie.position.y=pie.userData.base+Math.sin(t*3+pie.position.x)*0.12;
+      if(Math.hypot(pie.position.x-playerGroup.position.x, pie.position.z-playerGroup.position.z)<PIE_R){ pie.userData.on=false; pie.visible=false; pie.userData.t=8; pieCount++; sfxPie(); updateHUD(); } }
+
+    // vents (teleport to the other vent)
+    if(teleCool>0) teleCool-=dt;
+    if(teleCool<=0) for(const v of vents){ if(Math.hypot(v.x-playerGroup.position.x,v.z-playerGroup.position.z)<VENT_R){
+      const other=vents.find(o=>o!==v); playerGroup.position.set(other.x>0?other.x-3:other.x+3, 0, other.z); teleCool=1.2; sfxVent(); showBanner("Whoosh! 💨","#9fe3ff"); break; } }
+
+    // find nearest interactable (stand or portal) for the USE prompt
+    nearest=null; let best=INTERACT_R;
+    for(const st of stands){ if(form!==st.kind) continue; const d=Math.hypot(st.x-playerGroup.position.x,st.z-playerGroup.position.z); if(d<best){ best=d; nearest={kind_:"stand",ref:st}; } }
+    for(const po of portals){ const d=Math.hypot(po.x-playerGroup.position.x,po.z-playerGroup.position.z); if(d<best){ best=d; nearest={kind_:"portal",ref:po}; } }
+    if(nearest){ if(nearest.kind_==="stand"){ const st=nearest.ref; const has=owned[st.kind][st.costume.color];
+        showPrompt((has?"Wear ":"Buy ")+st.costume.name+(has?"":" • "+st.costume.price+"🥧")+"   ["+(isTouch?"USE":"E")+"]"); }
+      else showPrompt("Open "+nearest.ref.label+"   ["+(isTouch?"USE":"E")+"]"); }
+    else showPrompt(null);
+
+    // portals glow pulse
+    for(const po of portals) po.glow.material.opacity=0.4+Math.sin(t*3)*0.15;
+
+    updateCam(dt);
+  }
+  function updateCam(dt){ camDesired.set(playerGroup.position.x, 10, playerGroup.position.z+13);
+    camera.position.lerp(camDesired, 1-Math.pow(0.0025,dt));
+    camera.lookAt(playerGroup.position.x, 1.0, playerGroup.position.z-1); }
+  function updateMenuCam(dt){ const t=clock.elapsedTime; camera.position.set(Math.sin(t*0.18)*20, 13, Math.cos(t*0.18)*20); camera.lookAt(0,1,0);
+    pies.forEach(p=>{ if(p.userData.on){ p.rotation.y+=dt*1.5; p.position.y=p.userData.base+Math.sin(t*3+p.position.x)*0.12; } }); }
+
+  function lerpAngle(a,b,t){ let d=b-a; while(d>Math.PI)d-=Math.PI*2; while(d<-Math.PI)d+=Math.PI*2; return a+d*t; }
+  function animate(){ requestAnimationFrame(animate); const dt=Math.min(0.05,clock.getDelta());
+    if(state==="playing") update(dt); else updateMenuCam(dt); renderer.render(scene,camera); }
+
+  init();
+})();
+</script>
+</body>
+</html>
