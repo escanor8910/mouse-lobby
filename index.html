@@ -27,6 +27,16 @@
   .subtitle { font-size:clamp(16px,4.5vw,23px); color:#fff; max-width:600px; text-shadow:0 2px 6px rgba(0,0,0,0.6); }
   .emoji-row { font-size:clamp(36px,11vw,66px); letter-spacing:6px; filter:drop-shadow(0 6px 6px rgba(0,0,0,0.4)); }
   .hint { font-size:clamp(13px,3.6vw,17px); color:rgba(255,255,255,0.9); max-width:600px; }
+  .modes { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:700px; width:100%; }
+  @media (max-width:600px){ .modes { grid-template-columns:repeat(2,1fr); } }
+  .modebtn { pointer-events:auto; cursor:pointer; border:none; font-family:inherit; background:linear-gradient(#ffffff,#ffe9c2); color:#5a3a16; border-radius:18px; padding:12px 10px;
+    box-shadow:0 5px 0 #d9a85a, 0 8px 16px rgba(0,0,0,0.3); display:flex; flex-direction:column; align-items:center; gap:1px; transition:transform .06s,box-shadow .06s; }
+  .modebtn:active { transform:translateY(3px); box-shadow:0 2px 0 #d9a85a, 0 5px 10px rgba(0,0,0,0.25); }
+  .modebtn .mi { font-size:clamp(28px,7vw,40px); }
+  .modebtn b { font-size:clamp(12px,3.2vw,15px); color:#c07f1a; }
+  .modebtn i { font-style:normal; font-weight:bold; font-size:clamp(15px,4vw,19px); }
+  .modebtn small { font-size:clamp(10px,2.6vw,12px); color:#9a7035; font-weight:bold; }
+  .btn.small { font-size:clamp(15px,4vw,20px); padding:11px 22px; }
   .namebox { font-family:inherit; font-size:clamp(18px,5vw,26px); padding:12px 18px; border-radius:14px; border:3px solid #ffd23f; outline:none; text-align:center; width:min(320px,80vw); }
   .btn { pointer-events:auto; cursor:pointer; border:none; font-family:inherit; font-weight:bold; margin:4px; background:linear-gradient(#ffcf4d,#ffac1c); color:#5a3a00; border-radius:999px; padding:15px 34px; font-size:clamp(19px,5.5vw,28px);
     box-shadow:0 6px 0 #c9871a, 0 10px 18px rgba(0,0,0,0.35); transition:transform .06s,box-shadow .06s; }
@@ -55,6 +65,7 @@
     <div id="hudLeft">
       <div class="badge">🥧 <span id="pieCount">0</span><small>pies</small></div>
       <div class="badge" id="formBadge">🐭 <span id="formText">Mouse</span><small>you are</small></div>
+      <div class="badge" id="modeBadge">⏱️ <span id="modeTime">15</span>s<small>modes in</small></div>
     </div>
     <div id="hudRight">
       <div class="badge">👋 <span id="nameText">Mouse</span><small>code <span id="codeText">—</span></small></div>
@@ -76,6 +87,22 @@
     <div class="hint" id="controlHint">Move: arrow keys / W A S D &nbsp;•&nbsp; press <b>E</b> to buy a costume or open a game door.</div>
   </div>
 
+  <!-- Mode picker (after 15s in the lobby) -->
+  <div class="overlay hidden" id="modeScreen">
+    <div class="emoji-row">🎮</div>
+    <h1 class="title">Pick a <span class="em">Mode!</span></h1>
+    <div class="subtitle">You hung out in the lobby — time to play! Choose a game mode:</div>
+    <div class="modes">
+      <button class="modebtn" data-mode="cheese"><span class="mi">🧀</span><b>Mode 1</b><i>Cheese Dash</i><small>Grab cheese, dodge the cat</small></button>
+      <button class="modebtn" data-mode="cheese-hard"><span class="mi">⚡</span><b>Mode 2</b><i>Pie Rush</i><small>Super-fast cat — yikes!</small></button>
+      <button class="modebtn" data-mode="cheese-2p"><span class="mi">👯</span><b>Mode 3</b><i>2-Player Dash</i><small>Play with a friend</small></button>
+      <button class="modebtn" data-mode="sneaky"><span class="mi">🫥</span><b>Mode 4</b><i>Sneaky Mouse</i><small>Sneak past vision cones</small></button>
+      <button class="modebtn" data-mode="sneaky-hard"><span class="mi">🐱</span><b>Mode 5</b><i>Spy Master</i><small>3 cats — super sneaky!</small></button>
+      <button class="modebtn" data-mode="random"><span class="mi">🎲</span><b>Mode 6</b><i>Surprise!</i><small>A random game</small></button>
+    </div>
+    <button class="btn small" id="stayBtn">🏠 Stay in the Lobby</button>
+  </div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
         onerror="document.getElementById('loadMsg').innerHTML='😕 Could not load the lobby.<br><br>Please check your internet and refresh.'"></script>
 <script>
@@ -91,6 +118,14 @@
   // ---- tuning ----
   const SPEED = 9, PLAYER_R = 0.8, BX = 31, BZ = 20;
   const INTERACT_R = 3.4, PIE_R = 1.7, VENT_R = 1.7;
+  const MODE_SECONDS = 15;   // wait this long in the lobby, then the mode picker pops up
+  const MODE_URLS = {
+    "cheese":      GAME_LINKS.cheese,
+    "cheese-hard": GAME_LINKS.cheese + "?hard=1",
+    "cheese-2p":   GAME_LINKS.cheese + "?players=2",
+    "sneaky":      GAME_LINKS.sneaky,
+    "sneaky-hard": GAME_LINKS.sneaky + "?start=3",
+  };
 
   const MOUSE_COSTUMES = [
     { name:"Gray",   color:0x9aa3c0, price:0 }, { name:"Red",    color:0xd83a3a, price:1 },
@@ -111,7 +146,7 @@
   let form = "mouse", pieCount = 0, playerName = "Mouse", inviteCode = "MOUSE";
   let curMouseColor = 0x9aa3c0, curCatColor = 0xf2922b;
   const owned = { mouse: { 0x9aa3c0:true }, cat: { 0xf2922b:true } };
-  let state = "start", walkPhase = 0, teleCool = 0, nearest = null;
+  let state = "start", walkPhase = 0, teleCool = 0, nearest = null, modeTimer = MODE_SECONDS;
   const keys = {};
   const joy = { x:0, y:0, active:false };
   const camDesired = new THREE.Vector3();
@@ -392,6 +427,8 @@
     addEventListener("keydown", e=>{ const k=e.key.toLowerCase(); keys[k]=true; if(k==="e"||k==="enter") doUse(); if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(k)) e.preventDefault(); }, {passive:false});
     addEventListener("keyup", e=>{ keys[e.key.toLowerCase()]=false; });
     document.getElementById("playBtn").onclick = enterLobby;
+    document.querySelectorAll(".modebtn").forEach(b=>{ b.onclick = ()=>pickMode(b.getAttribute("data-mode")); });
+    document.getElementById("stayBtn").onclick = stayInLobby;
     document.getElementById("nameInput").addEventListener("keydown", e=>{ if(e.key==="Enter") enterLobby(); });
     document.getElementById("muteBtn").onclick = ()=>{ muted=!muted; document.getElementById("muteBtn").textContent=muted?"🔇":"🔊"; };
     setupJoystick();
@@ -424,6 +461,7 @@
     document.getElementById("codeText").textContent = inviteCode;
     document.getElementById("startScreen").classList.add("hidden");
     document.getElementById("hud").style.display="flex";
+    modeTimer = MODE_SECONDS; document.getElementById("modeTime").textContent = MODE_SECONDS;
     updateHUD(); state="playing";
     showBanner("Welcome, "+playerName+"! 🎉","#ffd23f");
   }
@@ -434,6 +472,13 @@
   function showBanner(text,color){ const b=document.getElementById("banner"); b.textContent=text; b.style.color=color||"#fff"; b.classList.add("show");
     if(bannerTimer)clearTimeout(bannerTimer); bannerTimer=setTimeout(()=>b.classList.remove("show"),1500); }
   function showPrompt(text){ const p=document.getElementById("prompt"); if(text){ p.textContent=text; p.style.display="block"; } else p.style.display="none"; }
+  function showModes(){ state="modes"; showPrompt(null); document.getElementById("modeScreen").classList.remove("hidden"); sfxPop(); }
+  function pickMode(mode){
+    if(mode==="random"){ const ks=Object.keys(MODE_URLS); mode=ks[Math.floor(Math.random()*ks.length)]; }
+    sfxBuy(); showBanner("Starting… 🎮","#ffd23f");
+    setTimeout(()=>{ window.location.href = MODE_URLS[mode]; }, 500);
+  }
+  function stayInLobby(){ document.getElementById("modeScreen").classList.add("hidden"); modeTimer=MODE_SECONDS; state="playing"; showBanner("Have fun exploring! 🐭","#fff"); }
 
   // ---- interactions ----
   function doUse(){
@@ -468,6 +513,10 @@
   // ---- per-frame ----
   function update(dt){
     const t=clock.elapsedTime;
+    // countdown to the mode picker
+    modeTimer -= dt;
+    document.getElementById("modeTime").textContent = Math.max(0, Math.ceil(modeTimer));
+    if(modeTimer <= 0){ showModes(); return; }
     let mx=0,mz=0;
     if(keys["arrowup"]||keys["w"])mz-=1; if(keys["arrowdown"]||keys["s"])mz+=1;
     if(keys["arrowleft"]||keys["a"])mx-=1; if(keys["arrowright"]||keys["d"])mx+=1;
@@ -519,7 +568,7 @@
 
   function lerpAngle(a,b,t){ let d=b-a; while(d>Math.PI)d-=Math.PI*2; while(d<-Math.PI)d+=Math.PI*2; return a+d*t; }
   function animate(){ requestAnimationFrame(animate); const dt=Math.min(0.05,clock.getDelta());
-    if(state==="playing") update(dt); else updateMenuCam(dt); renderer.render(scene,camera); }
+    if(state==="playing") update(dt); else if(state==="start") updateMenuCam(dt); renderer.render(scene,camera); }
 
   init();
 })();
