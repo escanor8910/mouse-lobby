@@ -6,23 +6,23 @@
 <title>Mouse &amp; Cat Lobby</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#caa; font-family:"Comic Sans MS","Baloo","Trebuchet MS",system-ui,sans-serif;
+  html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:#f0d8b8; font-family:"Comic Sans MS","Baloo","Trebuchet MS",system-ui,sans-serif;
     overscroll-behavior:none; touch-action:none; user-select:none; -webkit-user-select:none; }
   #game { position:fixed; inset:0; } canvas { display:block; }
 
   #hud { position:fixed; top:0; left:0; right:0; padding:10px 12px; display:none; justify-content:space-between; align-items:flex-start; pointer-events:none; z-index:5; gap:8px; }
-  .badge { background:rgba(255,255,255,0.9); border-radius:16px; padding:7px 12px; font-weight:bold; color:#5a3a22; box-shadow:0 4px 0 rgba(0,0,0,0.18); font-size:clamp(14px,4vw,20px); line-height:1.12; white-space:nowrap; }
+  .badge { background:rgba(255,255,255,0.92); border-radius:16px; padding:7px 12px; font-weight:bold; color:#5a3a22; box-shadow:0 4px 0 rgba(0,0,0,0.16); font-size:clamp(14px,4vw,20px); line-height:1.12; white-space:nowrap; }
   .badge small { display:block; font-size:0.58em; color:#a07a55; font-weight:bold; }
   #hudLeft,#hudRight { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-  #muteBtn { pointer-events:auto; cursor:pointer; width:46px; height:46px; border-radius:50%; border:none; background:rgba(255,255,255,0.9); font-size:22px; box-shadow:0 4px 0 rgba(0,0,0,0.18); display:flex; align-items:center; justify-content:center; }
+  #muteBtn { pointer-events:auto; cursor:pointer; width:46px; height:46px; border-radius:50%; border:none; background:rgba(255,255,255,0.92); font-size:22px; box-shadow:0 4px 0 rgba(0,0,0,0.16); display:flex; align-items:center; justify-content:center; }
 
   #prompt { position:fixed; left:50%; bottom:140px; transform:translateX(-50%); z-index:7; pointer-events:none; display:none;
-    background:rgba(0,0,0,0.6); color:#fff; padding:10px 18px; border-radius:16px; font-weight:bold; font-size:clamp(15px,4vw,21px); text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+    background:rgba(40,25,15,0.72); color:#fff; padding:10px 18px; border-radius:16px; font-weight:bold; font-size:clamp(15px,4vw,21px); text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.3); }
 
   .overlay { position:fixed; inset:0; z-index:20; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; text-align:center; padding:24px;
-    background:radial-gradient(circle at 50% 30%, rgba(0,0,0,0.2), rgba(0,0,0,0.6)); backdrop-filter:blur(2px); }
+    background:radial-gradient(circle at 50% 30%, rgba(60,30,10,0.15), rgba(30,15,5,0.6)); backdrop-filter:blur(2px); }
   .overlay.hidden { display:none; }
-  .title { font-size:clamp(34px,10vw,74px); color:#fff; margin:0; line-height:1; text-shadow:0 4px 0 #b9743a, 0 8px 0 rgba(0,0,0,0.25), 0 14px 22px rgba(0,0,0,0.5); }
+  .title { font-size:clamp(34px,10vw,76px); color:#fff; margin:0; line-height:1; text-shadow:0 4px 0 #c77a3a, 0 8px 0 rgba(0,0,0,0.22), 0 14px 22px rgba(0,0,0,0.5); }
   .title .em { color:#ffd23f; }
   .subtitle { font-size:clamp(16px,4.5vw,23px); color:#fff; max-width:600px; text-shadow:0 2px 6px rgba(0,0,0,0.6); }
   .emoji-row { font-size:clamp(36px,11vw,66px); letter-spacing:6px; filter:drop-shadow(0 6px 6px rgba(0,0,0,0.4)); }
@@ -44,7 +44,7 @@
   #banner { position:fixed; top:30%; left:50%; transform:translate(-50%,-50%); z-index:12; pointer-events:none; text-align:center; font-size:clamp(28px,8vw,56px); font-weight:bold; color:#fff;
     text-shadow:0 4px 0 rgba(0,0,0,0.3), 0 8px 18px rgba(0,0,0,0.6); opacity:0; transition:opacity .25s,transform .25s; }
   #banner.show { opacity:1; }
-  #loadMsg { position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; font-size:20px; padding:30px; background:#7a5a44; }
+  #loadMsg { position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; text-align:center; color:#5a3a22; font-size:20px; padding:30px; background:#f0d8b8; }
 </style>
 </head>
 <body>
@@ -70,7 +70,7 @@
   <div class="overlay" id="startScreen">
     <div class="emoji-row">🐭 &nbsp; 🥧 &nbsp; 🐱</div>
     <h1 class="title">Mouse &amp; Cat <span class="em">Lobby</span></h1>
-    <div class="subtitle">Walk around, collect pies 🥧, buy fun costumes, and go to the cat home to turn into a cat! 🐱</div>
+    <div class="subtitle">Explore the cozy market, collect pies 🥧, dress up in fun costumes, and cross the archway to become a cat! 🐱</div>
     <input class="namebox" id="nameInput" maxlength="12" placeholder="Type your name">
     <button class="btn" id="playBtn">▶ Enter Lobby</button>
     <div class="hint" id="controlHint">Move: arrow keys / W A S D &nbsp;•&nbsp; press <b>E</b> to buy a costume or open a game door.</div>
@@ -83,17 +83,15 @@
 (function () {
   if (typeof THREE === "undefined") return;
 
-  // game links for the portals
   const GAME_LINKS = {
     cheese: "https://escanor8910.github.io/cheese-dash/",
     sneaky: "https://escanor8910.github.io/sneaky-mouse/",
   };
 
   // ---- tuning ----
-  const SPEED = 9, PLAYER_R = 0.8, BX = 29, BZ = 19;     // bounds
-  const INTERACT_R = 3.2, PIE_R = 1.6, VENT_R = 1.6;
+  const SPEED = 9, PLAYER_R = 0.8, BX = 31, BZ = 20;
+  const INTERACT_R = 3.4, PIE_R = 1.7, VENT_R = 1.7;
 
-  // ---- costumes ----
   const MOUSE_COSTUMES = [
     { name:"Gray",   color:0x9aa3c0, price:0 }, { name:"Red",    color:0xd83a3a, price:1 },
     { name:"Blue",   color:0x3a76e0, price:1 }, { name:"Purple", color:0x9148db, price:1 },
@@ -108,15 +106,14 @@
 
   // ---- globals ----
   let scene, camera, renderer, clock;
-  let playerGroup, mouseModel, catModel;
-  let walls = [], pies = [], stands = [], portals = [], vents = [];
+  let playerGroup, mouseModel, catModel, motes;
+  let walls = [], pies = [], stands = [], portals = [], vents = [], spinners = [];
   let form = "mouse", pieCount = 0, playerName = "Mouse", inviteCode = "MOUSE";
   let curMouseColor = 0x9aa3c0, curCatColor = 0xf2922b;
   const owned = { mouse: { 0x9aa3c0:true }, cat: { 0xf2922b:true } };
-  let state = "start", walkPhase = 0, teleCool = 0, nearest = null, useArmed = false;
+  let state = "start", walkPhase = 0, teleCool = 0, nearest = null;
   const keys = {};
   const joy = { x:0, y:0, active:false };
-  const tmp = new THREE.Vector3();
   const camDesired = new THREE.Vector3();
   const isTouch = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
 
@@ -132,13 +129,27 @@
   function sfxPop(){ tone(440,0.12,"sine",0.18); tone(880,0.12,"sine",0.12,actx?actx.currentTime+0.05:0); }
   function sfxVent(){ tone(300,0.18,"sine",0.18); tone(600,0.18,"sine",0.14,actx?actx.currentTime+0.08:0); }
 
+  // ---- textures ----
+  function makeSky(){ const c=document.createElement("canvas"); c.width=16; c.height=256; const g=c.getContext("2d");
+    const gr=g.createLinearGradient(0,0,0,256); gr.addColorStop(0,"#ffe9c2"); gr.addColorStop(0.5,"#ffd9b0"); gr.addColorStop(1,"#f3c79a");
+    g.fillStyle=gr; g.fillRect(0,0,16,256); const t=new THREE.CanvasTexture(c); return t; }
+  function makeFloorTex(kind){ const c=document.createElement("canvas"); c.width=c.height=256; const g=c.getContext("2d");
+    if(kind==="mouse"){ g.fillStyle="#c89a60"; g.fillRect(0,0,256,256);
+      for(let i=0;i<8;i++){ g.fillStyle=i%2?"#c0925a":"#cea366"; g.fillRect(0,i*32,256,32); }
+      g.strokeStyle="rgba(90,60,30,0.18)"; g.lineWidth=2; for(let i=0;i<=8;i++){ g.beginPath(); g.moveTo(0,i*32); g.lineTo(256,i*32); g.stroke(); }
+      for(let i=0;i<500;i++){ const r=((i*9301+49297)%233280)/233280,r2=((i*4099+7919)%65521)/65521; g.fillStyle=r>0.5?"rgba(255,255,255,0.05)":"rgba(70,45,20,0.08)"; g.fillRect(r*256,r2*256,3,2); } }
+    else { g.fillStyle="#ecdcf0"; g.fillRect(0,0,256,256);
+      for(let y=0;y<8;y++)for(let x=0;x<8;x++){ g.fillStyle=((x+y)%2)?"#e7d2ec":"#f3e7f6"; g.fillRect(x*32,y*32,32,32); }
+      g.strokeStyle="rgba(150,110,160,0.18)"; g.lineWidth=2; for(let i=0;i<=8;i++){ g.beginPath(); g.moveTo(i*32,0); g.lineTo(i*32,256); g.stroke(); g.beginPath(); g.moveTo(0,i*32); g.lineTo(256,i*32); g.stroke(); } }
+    const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; return t; }
+
   // ---- init ----
   function init(){
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xbfa890);
-    scene.fog = new THREE.Fog(0xbfa890, 45, 95);
+    scene.background = makeSky();
+    scene.fog = new THREE.Fog(0xf3cea0, 50, 100);
 
-    camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 200);
+    camera = new THREE.PerspectiveCamera(54, innerWidth/innerHeight, 0.1, 220);
     camera.position.set(0,11,14);
 
     renderer = new THREE.WebGLRenderer({ antialias:true });
@@ -147,18 +158,22 @@
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.getElementById("game").appendChild(renderer.domElement);
 
-    scene.add(new THREE.HemisphereLight(0xfff2e0, 0x6a5a4a, 1.0));
-    const sun = new THREE.DirectionalLight(0xfff2d8, 0.85); sun.position.set(20,34,12); sun.castShadow=true;
-    sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.near=1; sun.shadow.camera.far=130;
-    sun.shadow.camera.left=-50; sun.shadow.camera.right=50; sun.shadow.camera.top=40; sun.shadow.camera.bottom=-40; sun.shadow.bias=-0.0004;
+    scene.add(new THREE.HemisphereLight(0xfff3df, 0x8a6f5a, 1.05));
+    const sun = new THREE.DirectionalLight(0xfff0d2, 0.8); sun.position.set(16,34,16); sun.castShadow=true;
+    sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.near=1; sun.shadow.camera.far=140;
+    sun.shadow.camera.left=-55; sun.shadow.camera.right=55; sun.shadow.camera.top=45; sun.shadow.camera.bottom=-45; sun.shadow.bias=-0.0004;
     scene.add(sun);
+    // warm + cool accent lights
+    const warm=new THREE.PointLight(0xffcaa0, 0.6, 60); warm.position.set(-16,9,0); scene.add(warm);
+    const cool=new THREE.PointLight(0xc9b6ff, 0.55, 60); cool.position.set(16,9,0); scene.add(cool);
 
     buildWorld();
+    buildMotes();
 
     playerGroup = new THREE.Group(); scene.add(playerGroup);
     mouseModel = makeMouse(curMouseColor); catModel = makeCat(curCatColor); catModel.visible=false;
     playerGroup.add(mouseModel); playerGroup.add(catModel);
-    playerGroup.position.set(-12,0,10);
+    playerGroup.position.set(-13,0,11);
 
     clock = new THREE.Clock();
     bindEvents();
@@ -183,7 +198,6 @@
     [-1,1].forEach(s=>{ const e=new THREE.Mesh(new THREE.SphereGeometry(0.07,8,8),black); e.position.set(0.16*s,0.76,1.02); g.add(e); });
     const nose=new THREE.Mesh(new THREE.SphereGeometry(0.08,8,8),pink); nose.position.set(0,0.64,1.13); g.add(nose);
     const tail=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.03,1.25,6),pink); tail.position.set(0,0.68,-0.82); tail.rotation.x=-Math.PI/3; g.add(tail);
-    // witch hat (hidden unless worn)
     const hat=new THREE.Group();
     const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.05,16),new THREE.MeshStandardMaterial({color:0x2a1f4d})); brim.position.y=1.18; hat.add(brim);
     const cone=new THREE.Mesh(new THREE.ConeGeometry(0.3,0.7,16),new THREE.MeshStandardMaterial({color:0x3c2c6b})); cone.position.y=1.55; hat.add(cone);
@@ -212,86 +226,135 @@
     return g;
   }
 
-  // ---- labels (canvas sprites) ----
-  function makeLabel(text, color){
-    const c=document.createElement("canvas"); c.width=256; c.height=72; const x=c.getContext("2d");
-    x.fillStyle="rgba(0,0,0,0.0)"; x.fillRect(0,0,256,72);
-    x.font="bold 30px 'Comic Sans MS', sans-serif"; x.textAlign="center"; x.textBaseline="middle";
-    x.lineWidth=6; x.strokeStyle="rgba(0,0,0,0.55)"; x.strokeText(text,128,36);
-    x.fillStyle=color||"#fff"; x.fillText(text,128,36);
+  // ---- labels ----
+  function makeLabel(text, color, big){
+    const c=document.createElement("canvas"); c.width=320; c.height=84; const x=c.getContext("2d");
+    x.font="bold "+(big?38:30)+"px 'Comic Sans MS', sans-serif"; x.textAlign="center"; x.textBaseline="middle";
+    x.lineWidth=7; x.strokeStyle="rgba(0,0,0,0.5)"; x.strokeText(text,160,44); x.fillStyle=color||"#fff"; x.fillText(text,160,44);
     const tex=new THREE.CanvasTexture(c);
     const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));
-    sp.scale.set(3.4,0.95,1); return sp;
+    sp.scale.set(big?4.6:3.4, big?1.2:0.9, 1); return sp;
   }
 
-  // ---- world ----
+  // ---- primitive helpers ----
   function box(x,y,z,sx,sy,sz,color,solid,rough){
-    const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz), new THREE.MeshStandardMaterial({color:color,roughness:rough==null?0.95:rough}));
+    const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz), new THREE.MeshStandardMaterial({color:color,roughness:rough==null?0.9:rough}));
     m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; scene.add(m);
     if(solid) walls.push({minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2});
     return m;
   }
-  function cyl(x,y,z,r,h,color){ const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,16),new THREE.MeshStandardMaterial({color:color,roughness:0.85})); m.position.set(x,y,z); m.castShadow=true; scene.add(m); return m; }
+  function cyl(x,y,z,rt,rb,h,color,rough){ const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,18),new THREE.MeshStandardMaterial({color:color,roughness:rough==null?0.85:rough})); m.position.set(x,y,z); m.castShadow=true; scene.add(m); return m; }
+  function sphere(x,y,z,r,color,emissive){ const m=new THREE.Mesh(new THREE.SphereGeometry(r,14,14),new THREE.MeshStandardMaterial({color:color,roughness:0.6,emissive:emissive||0x000000,emissiveIntensity:emissive?0.7:0})); m.position.set(x,y,z); m.castShadow=true; scene.add(m); return m; }
+
+  function placeLabel(text,x,y,z,color,big){ const s=makeLabel(text,color,big); s.position.set(x,y,z); scene.add(s); return s; }
+
+  // ---- decor builders ----
+  function wallWithWainscot(x,y,z,sx,sy,sz,upper,lower,solid){
+    box(x,y,z,sx,sy,sz,upper,solid);                                   // main wall
+    const lx = sx>sz; // orientation
+    box(x, 1.1, z, lx?sx:sz*0+sx, 2.0, sz, lower, false);             // lower wainscot panel (overlaps)
+    box(x, 2.2, z, sx, 0.18, sz, 0x000000, false).material.color.set(0x5a3f2a); // rail
+  }
+  function plant(x,z){ cyl(x,0.4,z,0.45,0.55,0.8,0xb5652f); sphere(x,1.0,z,0.6,0x4f9d52); sphere(x-0.4,0.85,z+0.2,0.42,0x57ac57); sphere(x+0.4,0.9,z-0.1,0.4,0x49934c); sphere(x,1.4,z,0.4,0x5fb35f); }
+  function lantern(x,y,z,color){ const s=sphere(x,y,z,0.28,0xffffff,color); s.material.color.set(color); cyl(x,y+0.35,z,0.04,0.04,0.5,0x3a2a1a); return s; }
+  function stringLights(x1,z1,x2,z2,y,n){ for(let i=0;i<=n;i++){ const t=i/n; const x=x1+(x2-x1)*t, z=z1+(z2-z1)*t; const dip=Math.sin(t*Math.PI)*0.5; const cols=[0xff6b6b,0xffd23f,0x6bd0ff,0x9be870,0xff9ce0]; lantern(x,y-dip,z,cols[i%cols.length]); } }
+  function balloon(x,z,color){ const s=sphere(x,3.2,z,0.55,color); s.scale.y=1.2; cyl(x,2.3,z,0.02,0.02,1.4,0x888888); }
+  function pictureFrame(x,y,z,color,faceZ){ const f=box(x,y,z,1.6,1.2,0.12,0x6b4a2c,false); const pic=box(x,y,z+(faceZ||-0.07),1.25,0.9,0.05,color,false); }
+  function awning(x,z,cA,cB,w){ // striped canopy over a stall
+    const n=Math.max(3,Math.round(w/0.9));
+    for(let i=0;i<n;i++){ const sw=w/n; const bx=x-w/2+sw*(i+0.5); const m=box(bx,3.0,z+0.9,sw*0.96,0.18,1.8,i%2?cA:cB,false); m.rotation.x=-0.32; }
+    box(x,3.45,z+0.05,w+0.3,0.25,0.4,0x7a5236,false);  // valance bar
+    cyl(x-w/2+0.2,1.8,z+1.5,0.12,0.12,3.2,0x8a6038); cyl(x+w/2-0.2,1.8,z+1.5,0.12,0.12,3.2,0x8a6038); // posts
+  }
+  function podium(x,z,kind,costume){
+    cyl(x,0.18,z,0.7,0.78,0.36,0x9a7a52);              // base
+    cyl(x,0.42,z,0.62,0.62,0.16,0xf0e2c4,0.5);         // top disc
+    const mini = kind==="mouse" ? makeMouse(costume.color) : makeCat(costume.color);
+    mini.scale.setScalar(kind==="mouse"?0.55:0.5); mini.position.set(x,0.5,z); scene.add(mini);
+    if (kind==="mouse" && costume.hat) mini.userData.hat.visible=true;
+    // spotlight cone
+    const cone=new THREE.Mesh(new THREE.ConeGeometry(0.85,2.2,16,1,true), new THREE.MeshBasicMaterial({color:0xfff3c0,transparent:true,opacity:0.16,side:THREE.DoubleSide,depthWrite:false}));
+    cone.position.set(x,1.7,z); scene.add(cone);
+    const label=makeLabel(costume.name+(costume.price?" • "+costume.price+"🥧":" • Free"), "#fff");
+    label.position.set(x,2.5,z); label.scale.set(3.0,0.85,1); scene.add(label);
+    stands.push({ x, z, kind, costume, mini }); spinners.push(mini);
+  }
 
   function buildWorld(){
     // floors
-    const fM=new THREE.Mesh(new THREE.PlaneGeometry(30,40), new THREE.MeshStandardMaterial({color:0xb98a55,roughness:1})); fM.rotation.x=-Math.PI/2; fM.position.set(-15,0,0); fM.receiveShadow=true; scene.add(fM);
-    const fC=new THREE.Mesh(new THREE.PlaneGeometry(30,40), new THREE.MeshStandardMaterial({color:0xe7d4e8,roughness:1})); fC.rotation.x=-Math.PI/2; fC.position.set(15,0,0); fC.receiveShadow=true; scene.add(fC);
+    const fM=new THREE.Mesh(new THREE.PlaneGeometry(34,42), new THREE.MeshStandardMaterial({map:makeFloorTex("mouse"),roughness:1})); fM.material.map.repeat.set(6,7); fM.rotation.x=-Math.PI/2; fM.position.set(-16,0,0); fM.receiveShadow=true; scene.add(fM);
+    const fC=new THREE.Mesh(new THREE.PlaneGeometry(34,42), new THREE.MeshStandardMaterial({map:makeFloorTex("cat"),roughness:1})); fC.material.map.repeat.set(6,7); fC.rotation.x=-Math.PI/2; fC.position.set(16,0,0); fC.receiveShadow=true; scene.add(fC);
 
-    // outer walls (solid)
-    box(0,2.5,-20,62,5,1,0x7a5a44,true);     // back
-    box(0,2.5,20,62,5,1,0x7a5a44,true);      // front
-    box(-30,2.5,0,1,5,40,0x6e5040,true);     // left
-    box(30,2.5,0,1,5,40,0x9a86a0,true);      // right
-    // divider with a doorway gap around z in [-3.5,3.5]
-    box(0,2.5,-11.75,1,5,16.5,0x6e5847,true);
-    box(0,2.5,11.75,1,5,16.5,0x6e5847,true);
-    box(0,4.4,0,1,1.2,7,0x6e5847,false);     // door top arch (non-solid)
+    // outer walls
+    box(-16,3,-21,34,6,1.2,0x8a6a4a,true); box(16,3,-21,34,6,1.2,0xb89ec0,true);   // back (warm / pastel)
+    box(-16,3,21,34,6,1.2,0x8a6a4a,true);  box(16,3,21,34,6,1.2,0xb89ec0,true);    // front
+    box(-32,3,0,1.2,6,42,0x7e5e40,true);   box(32,3,0,1.2,6,42,0xa890b0,true);     // sides
+    // wainscot trim along back walls
+    box(-16,1.0,-20.4,34,2.0,0.3,0x6b4a2c,false); box(16,1.0,-20.4,34,2.0,0.3,0x9b7fa0,false);
+    box(-16,5.4,-20.45,34,0.4,0.4,0xd8b98a,false); box(16,5.4,-20.45,34,0.4,0.4,0xe6d2ea,false); // cornice
 
-    // ---- mouse house decor ----
-    box(-15,1.0,-17.5,16,2,1.6,0x8a5e36,false);          // shop counter
-    box(-15,2.1,-17.4,16.4,0.3,2,0xc7a878,false);        // counter top
-    makeMouseHole(-27.5,-14);
-    bookStack(-25,8); bookStack(-22.5,8.8); toyBlocks(-24,-2); toyBlocks(-9,13);
-    placeLabel("🧀 Mouse Shop", -15, 4.2, -17.5, "#5a3a16");
+    // central divider + grand archway (doorway gap z in [-4,4])
+    box(0,3,-12.5,1.4,6,15,0x77573c,true); box(0,3,12.5,1.4,6,15,0x77573c,true);
+    cyl(-1.6,2.4,0,0.5,0.5,4.8,0xc99a5e); cyl(1.6,2.4,0,0.5,0.5,4.8,0xc99a5e);     // arch pillars
+    box(0,5.2,0,4.6,0.7,1.2,0xc99a5e,false);                                        // arch top
+    const archTop=new THREE.Mesh(new THREE.TorusGeometry(2.0,0.4,10,20,Math.PI), new THREE.MeshStandardMaterial({color:0xd8a868,roughness:0.8})); archTop.position.set(0,4.6,0); scene.add(archTop);
+    placeLabel("Cat Home →", 0, 6.0, 0.5, "#fff");
 
-    // ---- cat home decor ----
-    box(15,1.0,-17.5,16,2,1.6,0xb98fb0,false);           // cat shop counter
-    box(15,2.1,-17.4,16.4,0.3,2,0xe3c7e0,false);
-    box(15,2.0,19.4,7,3,0.3,0x9fcdf0,false);             // window backdrop
-    box(15,2.0,19.5,7,0.2,0.35,0xeaeaf0,false); box(15,2.0,19.5,0.25,3,0.35,0xeaeaf0,false);
-    rug(11,16,0xf5b6cf); rug(19,16,0xb6d2f5); rug(15,8,0xf5e08a);
-    catBed(11,15); catTree(20,15); toyBall(13,9,0xe84538); toyBall(17,10,0x3a8ee0);
-    cyl(18,0.28,17,0.5,0.16,0xe0c89a); cyl(20,0.28,17,0.5,0.16,0xa9d4f0);   // bowls
-    placeLabel("🐱 Cat Home", 15, 4.2, -17.5, "#4a2a4a");
+    // ---- MOUSE MARKET (left) ----
+    placeLabel("🧀 Mouse Market", -16, 5.0, -19, "#ffe6b0", true);
+    awning(-22,-17.5,0xe24b3f,0xfff0d8,16); awning(-7,-17.5,0xe24b3f,0xfff0d8,8);
+    MOUSE_COSTUMES.forEach((c,i)=>{ podium(-26+i*2.8,-13.5,"mouse",c); });
+    // giant cheese wheel centerpiece
+    cheeseWheel(-16,5);
+    plant(-30,-18); plant(-30,18); plant(-3,18); plant(-12,-18);
+    bookStack(-28,9); bookStack(-25.5,10); toyBlocks(-27,2); toyBlocks(-7,13);
+    box(-29,0.4,-16,2.0,0.8,0.5,0x6e4a30,false); // mouse hole frame
+    (new THREE.Mesh(new THREE.CircleGeometry(0.85,18),new THREE.MeshBasicMaterial({color:0x140f12}))).rotation.x=-Math.PI/2;
+    const mh=new THREE.Mesh(new THREE.CircleGeometry(0.85,18),new THREE.MeshBasicMaterial({color:0x140f12})); mh.rotation.x=-Math.PI/2; mh.position.set(-29,0.04,-16); scene.add(mh);
+    stringLights(-31,-10,-31,10,5.2,8); stringLights(-31,12,-2,18,5.2,8);
+    pictureFrame(-24,4.2,-20.3,0xffd23f); pictureFrame(-9,4.2,-20.3,0x7fd0ff);
+    balloon(-6,-6,0xff6b6b); balloon(-20,7,0xffd23f);
 
-    // ---- pies (currency) ----
-    [[-20,-6],[-10,4],[-6,-12],[-24,14],[8,-6],[20,-12],[12,4],[22,12],[6,14],[-14,16]].forEach(p=>spawnPie(p[0],p[1]));
+    // ---- CAT LOUNGE (right) ----
+    placeLabel("🐱 Cat Lounge", 16, 5.0, -19, "#f3d8ff", true);
+    awning(10,-17.5,0xb86fd0,0xfff0fb,12); awning(24,-17.5,0xb86fd0,0xfff0fb,8);
+    CAT_COSTUMES.forEach((c,i)=>{ podium(8+i*3.2,-13.5,"cat",c); });
+    rug(16,5,0xf5b6cf); rug(24,12,0xb6d2f5);
+    catTree(26,5); catBed(11,6); toyBall(18,9,0xe84538); toyBall(21,11,0x3a8ee0);
+    cyl(28,0.28,16,0.5,0.5,0.16,0xe0c89a); cyl(30,0.28,16,0.5,0.5,0.16,0xa9d4f0); // bowls
+    // window with garden view
+    box(16,3.2,20.3,8,4,0.2,0x8fd0f0,false); box(16,1.3,20.2,8,0.8,0.3,0x6fae5a,false); // grass strip
+    box(16,3.2,20.25,8,0.25,0.32,0xffffff,false); box(16,3.2,20.25,0.3,4,0.32,0xffffff,false);
+    sphere(13,4.5,20.0,0.7,0xfff3a0); // sun in window
+    plant(30,-18); plant(30,18); plant(3,18);
+    stringLights(31,-10,31,10,5.2,8); stringLights(2,18,31,12,5.2,8);
+    balloon(20,-6,0x9be870); balloon(26,8,0xff9ce0);
 
-    // ---- costume stands ----
-    MOUSE_COSTUMES.forEach((c,i)=>{ const x=-24+i*2.7; makeStand(x,-14,"mouse",c); });
-    CAT_COSTUMES.forEach((c,i)=>{ const x=8+i*3.0; makeStand(x,-14,"cat",c); });
+    // ---- pies ----
+    [[-22,-6],[-12,4],[-7,-12],[-26,14],[8,-6],[22,-12],[12,4],[24,12],[6,14],[-15,16],[16,16],[0,-7]].forEach(p=>spawnPie(p[0],p[1]));
 
-    // ---- vents (quick travel + room swap) ----
-    makeVent(-26,16,"mouse"); makeVent(26,16,"cat");
+    // ---- vents ----
+    makeVent(-29,17); makeVent(29,17);
 
-    // ---- game portals (doors that launch the games) ----
-    makePortal(-8,18,"cheese","🧀 Cheese Dash", 0xffac1c);
-    makePortal(8,18,"sneaky","🐭 Sneaky Mouse", 0x4caf50);
-
-    placeLabel("Move around! → cross the door to become a CAT", 0, 3.4, -19.2, "#fff");
+    // ---- game portals ----
+    makePortal(-9,19,"cheese","🧀 Cheese Dash", 0xffac1c);
+    makePortal(9,19,"sneaky","🐭 Sneaky Mouse", 0x4caf50);
   }
 
-  function placeLabel(text,x,y,z,color){ const s=makeLabel(text,color); s.position.set(x,y,z); s.scale.set(7,1.9,1); scene.add(s); }
-  function makeMouseHole(x,z){ const h=new THREE.Mesh(new THREE.CircleGeometry(0.9,20),new THREE.MeshBasicMaterial({color:0x140f12})); h.rotation.x=-Math.PI/2; h.position.set(x,0.03,z); scene.add(h);
-    box(x,0.5,z,2.0,1.0,0.5,0x6e4a30,false); }
+  function cheeseWheel(x,z){
+    const wheel=new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.2,1.4,28,1,false,0,Math.PI*1.6), new THREE.MeshStandardMaterial({color:0xf0b62a,roughness:0.6,emissive:0x4a3300,emissiveIntensity:0.12}));
+    wheel.position.set(x,1.5,z); wheel.castShadow=true; scene.add(wheel);
+    for(let i=0;i<6;i++){ const h=sphere(x+Math.sin(i*1.7)*1.2, 1.4+Math.cos(i*2.1)*0.4, z+Math.cos(i*1.3)*0.9, 0.18, 0xcf9a14); }
+    cyl(x,0.5,z,2.4,2.6,1.0,0x9a7a4a); // pedestal
+    spinners.push(wheel);
+  }
   function bookStack(x,z){ const cols=[0xe2483f,0x3a76e0,0xf2cf2e,0x57b06a]; for(let i=0;i<4;i++) box(x,0.18+i*0.16,z,1.1-i*0.08,0.15,0.75,cols[i],false); }
   function toyBlocks(x,z){ box(x-0.8,0.4,z-0.5,0.8,0.8,0.8,0xe2483f,false); box(x+0.4,0.3,z,1.0,0.6,0.6,0x3a76e0,false); box(x,0.5,z+0.9,0.7,1.0,0.7,0xf2cf2e,false); }
-  function rug(x,z,color){ const m=new THREE.Mesh(new THREE.CircleGeometry(2.4,24),new THREE.MeshStandardMaterial({color:color,roughness:1})); m.rotation.x=-Math.PI/2; m.position.set(x,0.02,z); m.receiveShadow=true; scene.add(m); }
-  function catBed(x,z){ cyl(x,0.18,z,1.5,0.3,0xd44f7e); cyl(x,0.34,z,1.05,0.22,0xf3c9da); }
-  function catTree(x,z){ cyl(x,0.6,z,0.4,1.2,0x9a7a4a); box(x,1.5,z,2,0.4,2,0xc8a062,false); cyl(x,2.4,z,0.3,1.6,0x9a7a4a); box(x,3.3,z,1.6,0.4,1.6,0xc8a062,false);
-    const ball=new THREE.Mesh(new THREE.SphereGeometry(0.3,12,12),new THREE.MeshStandardMaterial({color:0xff5b8a})); ball.position.set(x+0.6,1.0,z); scene.add(ball); }
-  function toyBall(x,z,color){ const m=new THREE.Mesh(new THREE.SphereGeometry(0.4,14,14),new THREE.MeshStandardMaterial({color:color,roughness:0.5})); m.position.set(x,0.4,z); m.castShadow=true; scene.add(m); }
+  function rug(x,z,color){ const m=new THREE.Mesh(new THREE.CircleGeometry(2.6,28),new THREE.MeshStandardMaterial({color:color,roughness:1})); m.rotation.x=-Math.PI/2; m.position.set(x,0.02,z); m.receiveShadow=true; scene.add(m);
+    const m2=new THREE.Mesh(new THREE.RingGeometry(2.2,2.5,28),new THREE.MeshStandardMaterial({color:0xffffff,roughness:1,side:THREE.DoubleSide})); m2.rotation.x=-Math.PI/2; m2.position.set(x,0.03,z); scene.add(m2); }
+  function catBed(x,z){ cyl(x,0.18,z,1.5,1.5,0.3,0xd44f7e); cyl(x,0.34,z,1.05,1.05,0.22,0xf3c9da); }
+  function catTree(x,z){ cyl(x,0.6,z,0.4,0.4,1.2,0x9a7a4a); box(x,1.5,z,2,0.4,2,0xc8a062,false); cyl(x,2.4,z,0.3,0.3,1.6,0x9a7a4a); box(x,3.3,z,1.6,0.4,1.6,0xc8a062,false); sphere(x+0.6,1.0,z,0.3,0xff5b8a); }
+  function toyBall(x,z,color){ sphere(x,0.4,z,0.4,color); }
 
   // ---- pies ----
   function spawnPie(x,z){ const g=new THREE.Group();
@@ -300,38 +363,33 @@
     g.position.set(x,0.6,z); g.userData={base:0.6, on:true}; scene.add(g); pies.push(g);
   }
 
-  // ---- costume stand ----
-  function makeStand(x,z,kind,costume){
-    const g=new THREE.Group(); g.position.set(x,0,z);
-    cyl(x,0.25,z,0.55,0.5,0x8a6a48);
-    const mini = kind==="mouse" ? makeMouse(costume.color) : makeCat(costume.color);
-    mini.scale.setScalar(kind==="mouse"?0.55:0.5); mini.position.set(x,0.5,z); mini.rotation.y=Math.PI; scene.add(mini);
-    if (kind==="mouse" && costume.hat) mini.userData.hat.visible=true;
-    const label=makeLabel(costume.name+(costume.price?" • "+costume.price+"🥧":" • Free"), "#fff");
-    label.position.set(x,2.3,z); label.scale.set(3.0,0.85,1); scene.add(label);
-    stands.push({ x, z, kind, costume, mini });
-  }
-
-  // ---- vents ----
-  function makeVent(x,z,kind){ const ring=new THREE.Mesh(new THREE.TorusGeometry(1.0,0.18,10,24),new THREE.MeshStandardMaterial({color:0x9aa6b2,emissive:0x223044,emissiveIntensity:0.4}));
+  function makeVent(x,z){ const ring=new THREE.Mesh(new THREE.TorusGeometry(1.0,0.18,10,24),new THREE.MeshStandardMaterial({color:0x9aa6b2,emissive:0x223044,emissiveIntensity:0.4}));
     ring.rotation.x=-Math.PI/2; ring.position.set(x,0.1,z); scene.add(ring);
     const hole=new THREE.Mesh(new THREE.CircleGeometry(0.9,20),new THREE.MeshBasicMaterial({color:0x10141c})); hole.rotation.x=-Math.PI/2; hole.position.set(x,0.07,z); scene.add(hole);
-    const v={x,z,kind}; vents.push(v); }
+    placeLabel("Vent",x,1.6,z,"#bfe3ff"); vents.push({x,z}); }
 
-  // ---- portals ----
   function makePortal(x,z,key,label,color){
-    box(x,2.0,z+0.4,3.6,4,0.5,0x5a4636,false);                  // frame back
-    const glow=new THREE.Mesh(new THREE.PlaneGeometry(2.6,3.2),new THREE.MeshBasicMaterial({color:color,transparent:true,opacity:0.5})); glow.position.set(x,1.9,z+0.15); scene.add(glow);
-    const lab=makeLabel(label,"#fff"); lab.position.set(x,4.2,z); lab.scale.set(4.4,1.2,1); scene.add(lab);
-    portals.push({ x, z, key, label, glow });
+    cyl(x-1.6,2.0,z,0.32,0.32,4,0x5a4636); cyl(x+1.6,2.0,z,0.32,0.32,4,0x5a4636);     // pillars
+    box(x,4.1,z,4.0,0.6,0.7,0x5a4636,false);                                           // top
+    const swirl=new THREE.Mesh(new THREE.CircleGeometry(1.5,28), new THREE.MeshBasicMaterial({color:color,transparent:true,opacity:0.55}));
+    swirl.position.set(x,2.0,z-0.05); scene.add(swirl);
+    const lab=makeLabel(label,"#fff",true); lab.position.set(x,4.9,z); scene.add(lab);
+    portals.push({ x, z, key, label, glow:swirl });
+  }
+
+  // ---- ambient floating sparkles ----
+  function buildMotes(){
+    const N=70; const pos=new Float32Array(N*3);
+    for(let i=0;i<N;i++){ pos[i*3]=(Math.sin(i*12.9)*0.5+0.5)*64-32; pos[i*3+1]=(Math.sin(i*7.7)*0.5+0.5)*7+0.5; pos[i*3+2]=(Math.sin(i*3.3)*0.5+0.5)*40-20; }
+    const geo=new THREE.BufferGeometry(); geo.setAttribute("position",new THREE.BufferAttribute(pos,3));
+    motes=new THREE.Points(geo, new THREE.PointsMaterial({color:0xfff0c0,size:0.18,transparent:true,opacity:0.65,depthWrite:false,sizeAttenuation:true}));
+    scene.add(motes);
   }
 
   // ---- input ----
   function bindEvents(){
     addEventListener("resize", onResize);
-    addEventListener("keydown", e=>{ const k=e.key.toLowerCase(); keys[k]=true;
-      if(k==="e"||k==="enter") doUse();
-      if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(k)) e.preventDefault(); }, {passive:false});
+    addEventListener("keydown", e=>{ const k=e.key.toLowerCase(); keys[k]=true; if(k==="e"||k==="enter") doUse(); if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(k)) e.preventDefault(); }, {passive:false});
     addEventListener("keyup", e=>{ keys[e.key.toLowerCase()]=false; });
     document.getElementById("playBtn").onclick = enterLobby;
     document.getElementById("nameInput").addEventListener("keydown", e=>{ if(e.key==="Enter") enterLobby(); });
@@ -419,27 +477,24 @@
     if(moving){ playerGroup.position.x+=mx*SPEED*dt; playerGroup.position.z+=mz*SPEED*dt; resolve(playerGroup.position);
       playerGroup.rotation.y=lerpAngle(playerGroup.rotation.y,Math.atan2(mx,mz),0.3); walkPhase+=dt*12; }
 
-    // form switch by side of the divider
     const wantForm = playerGroup.position.x < 0 ? "mouse" : "cat";
-    if(wantForm!==form){ form=wantForm; mouseModel.visible=(form==="mouse"); catModel.visible=(form==="cat");
-      updateHUD(); showBanner(form==="cat"?"You're a CAT now! 🐱":"You're a MOUSE now! 🐭", "#fff"); sfxPop(); }
+    if(wantForm!==form){ form=wantForm; mouseModel.visible=(form==="mouse"); catModel.visible=(form==="cat"); updateHUD();
+      showBanner(form==="cat"?"You're a CAT now! 🐱":"You're a MOUSE now! 🐭","#fff"); sfxPop(); }
 
-    // walk animation on the visible model
     const vm = form==="mouse"?mouseModel:catModel;
     vm.userData.body.position.y = (form==="mouse"?0.6:0.8) + (moving?Math.abs(Math.sin(walkPhase))*0.12:Math.sin(t*2)*0.02);
     vm.userData.tail.rotation.z = Math.sin(walkPhase*0.8)*(moving?0.5:0.2);
 
-    // pies bob/spin + collect
+    for(const sp of spinners) sp.rotation.y += dt*0.7;   // podiums + cheese wheel spin
+
     for(const pie of pies){ if(!pie.userData.on){ pie.userData.t-=dt; if(pie.userData.t<=0){ pie.userData.on=true; pie.visible=true; } continue; }
       pie.rotation.y+=dt*2; pie.position.y=pie.userData.base+Math.sin(t*3+pie.position.x)*0.12;
       if(Math.hypot(pie.position.x-playerGroup.position.x, pie.position.z-playerGroup.position.z)<PIE_R){ pie.userData.on=false; pie.visible=false; pie.userData.t=8; pieCount++; sfxPie(); updateHUD(); } }
 
-    // vents (teleport to the other vent)
     if(teleCool>0) teleCool-=dt;
     if(teleCool<=0) for(const v of vents){ if(Math.hypot(v.x-playerGroup.position.x,v.z-playerGroup.position.z)<VENT_R){
       const other=vents.find(o=>o!==v); playerGroup.position.set(other.x>0?other.x-3:other.x+3, 0, other.z); teleCool=1.2; sfxVent(); showBanner("Whoosh! 💨","#9fe3ff"); break; } }
 
-    // find nearest interactable (stand or portal) for the USE prompt
     nearest=null; let best=INTERACT_R;
     for(const st of stands){ if(form!==st.kind) continue; const d=Math.hypot(st.x-playerGroup.position.x,st.z-playerGroup.position.z); if(d<best){ best=d; nearest={kind_:"stand",ref:st}; } }
     for(const po of portals){ const d=Math.hypot(po.x-playerGroup.position.x,po.z-playerGroup.position.z); if(d<best){ best=d; nearest={kind_:"portal",ref:po}; } }
@@ -448,16 +503,19 @@
       else showPrompt("Open "+nearest.ref.label+"   ["+(isTouch?"USE":"E")+"]"); }
     else showPrompt(null);
 
-    // portals glow pulse
-    for(const po of portals) po.glow.material.opacity=0.4+Math.sin(t*3)*0.15;
-
+    for(const po of portals) po.glow.material.opacity=0.45+Math.sin(t*3)*0.15;
+    animateMotes(dt);
     updateCam(dt);
   }
+  function animateMotes(dt){ if(!motes) return; const p=motes.geometry.attributes.position.array;
+    for(let i=0;i<p.length;i+=3){ p[i+1]+=dt*0.4; if(p[i+1]>7.5) p[i+1]=0.4; } motes.geometry.attributes.position.needsUpdate=true; motes.rotation.y+=dt*0.02; }
   function updateCam(dt){ camDesired.set(playerGroup.position.x, 10, playerGroup.position.z+13);
     camera.position.lerp(camDesired, 1-Math.pow(0.0025,dt));
     camera.lookAt(playerGroup.position.x, 1.0, playerGroup.position.z-1); }
-  function updateMenuCam(dt){ const t=clock.elapsedTime; camera.position.set(Math.sin(t*0.18)*20, 13, Math.cos(t*0.18)*20); camera.lookAt(0,1,0);
-    pies.forEach(p=>{ if(p.userData.on){ p.rotation.y+=dt*1.5; p.position.y=p.userData.base+Math.sin(t*3+p.position.x)*0.12; } }); }
+  function updateMenuCam(dt){ const t=clock.elapsedTime; camera.position.set(Math.sin(t*0.16)*22, 14, Math.cos(t*0.16)*22); camera.lookAt(0,1.5,0);
+    for(const sp of spinners) sp.rotation.y += dt*0.7;
+    pies.forEach(p=>{ if(p.userData.on){ p.rotation.y+=dt*1.5; p.position.y=p.userData.base+Math.sin(t*3+p.position.x)*0.12; } });
+    animateMotes(dt); }
 
   function lerpAngle(a,b,t){ let d=b-a; while(d>Math.PI)d-=Math.PI*2; while(d<-Math.PI)d+=Math.PI*2; return a+d*t; }
   function animate(){ requestAnimationFrame(animate); const dt=Math.min(0.05,clock.getDelta());
